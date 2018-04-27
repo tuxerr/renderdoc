@@ -722,7 +722,7 @@ HRESULT WrappedID3D12Device::CreateDescriptorHeap(const D3D12_DESCRIPTOR_HEAP_DE
       record->AddChunk(scope.Get());
 
       {
-        SCOPED_LOCK(m_CapTransitionLock);
+        SCOPED_READLOCK(m_CapTransitionLock);
         if(IsBackgroundCapturing(m_State))
           GetResourceManager()->MarkDirtyResource(wrapped->GetResourceID());
         else
@@ -886,7 +886,7 @@ void WrappedID3D12Device::CreateConstantBufferView(const D3D12_CONSTANT_BUFFER_V
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -931,7 +931,7 @@ void WrappedID3D12Device::CreateShaderResourceView(ID3D12Resource *pResource,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -985,7 +985,7 @@ void WrappedID3D12Device::CreateUnorderedAccessView(ID3D12Resource *pResource,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1033,7 +1033,7 @@ void WrappedID3D12Device::CreateRenderTargetView(ID3D12Resource *pResource,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1079,7 +1079,7 @@ void WrappedID3D12Device::CreateDepthStencilView(ID3D12Resource *pResource,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1122,7 +1122,7 @@ void WrappedID3D12Device::CreateSampler(const D3D12_SAMPLER_DESC *pDesc,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1315,7 +1315,7 @@ HRESULT WrappedID3D12Device::CreateCommittedResource(const D3D12_HEAP_PROPERTIES
       record->AddChunk(scope.Get());
 
       {
-        SCOPED_LOCK(m_CapTransitionLock);
+        SCOPED_READLOCK(m_CapTransitionLock);
         if(IsBackgroundCapturing(m_State))
           GetResourceManager()->MarkDirtyResource(wrapped->GetResourceID());
         else
@@ -1562,7 +1562,7 @@ HRESULT WrappedID3D12Device::CreatePlacedResource(ID3D12Heap *pHeap, UINT64 Heap
       record->AddChunk(scope.Get());
 
       {
-        SCOPED_LOCK(m_CapTransitionLock);
+        SCOPED_READLOCK(m_CapTransitionLock);
         if(IsBackgroundCapturing(m_State))
           GetResourceManager()->MarkDirtyResource(wrapped->GetResourceID());
         else
@@ -1942,7 +1942,7 @@ void WrappedID3D12Device::CopyDescriptors(
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -2049,7 +2049,7 @@ void WrappedID3D12Device::CopyDescriptorsSimple(UINT NumDescriptors,
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -2148,7 +2148,7 @@ HRESULT WrappedID3D12Device::MakeResident(UINT NumObjects, ID3D12Pageable *const
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -2187,7 +2187,7 @@ HRESULT WrappedID3D12Device::Evict(UINT NumObjects, ID3D12Pageable *const *ppObj
   bool capframe = false;
 
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 

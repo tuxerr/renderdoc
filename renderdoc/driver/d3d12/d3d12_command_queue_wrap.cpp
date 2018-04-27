@@ -342,7 +342,7 @@ void STDMETHODCALLTYPE WrappedID3D12CommandQueue::ExecuteCommandLists(
   if(IsCaptureMode(m_State))
   {
     SCOPED_LOCK(m_Lock);
-    SCOPED_LOCK(m_pDevice->GetCapTransitionLock());
+    SCOPED_READLOCK(m_pDevice->GetCapTransitionLock());
 
     bool capframe = IsActiveCapturing(m_State);
     std::set<ResourceId> refdIDs;

@@ -306,7 +306,7 @@ private:
 
   bool m_AppControlledCapture;
 
-  Threading::CriticalSection m_CapTransitionLock;
+  Threading::RWLock m_CapTransitionLock;
   CaptureState m_State;
 
   uint32_t m_SubmitCounter = 0;
@@ -388,7 +388,7 @@ public:
   D3D12ResourceManager *GetResourceManager() { return m_ResourceManager; }
   D3D12ShaderCache *GetShaderCache() { return m_ShaderCache; }
   ResourceId GetResourceID() { return m_ResourceID; }
-  Threading::CriticalSection &GetCapTransitionLock() { return m_CapTransitionLock; }
+  Threading::RWLock &GetCapTransitionLock() { return m_CapTransitionLock; }
   void ReleaseSwapchainResources(IDXGISwapChain *swap, IUnknown **backbuffers, int numBackbuffers);
   void FirstFrame(WrappedIDXGISwapChain4 *swap);
   FrameRecord &GetFrameRecord() { return m_FrameRecord; }

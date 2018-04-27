@@ -852,7 +852,7 @@ void WrappedID3D12Device::Unmap(ID3D12Resource *Resource, UINT Subresource, byte
 
   bool capframe = false;
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1085,7 +1085,7 @@ void WrappedID3D12Device::WriteToSubresource(ID3D12Resource *Resource, UINT Subr
 {
   bool capframe = false;
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_READLOCK(m_CapTransitionLock);
     capframe = IsActiveCapturing(m_State);
   }
 
@@ -1282,7 +1282,7 @@ void WrappedID3D12Device::StartFrameCapture(void *dev, void *wnd)
   // will check to see if they need to markdirty or markpendingdirty
   // and go into the frame record.
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_WRITELOCK(m_CapTransitionLock);
 
     initStateCurBatch = 0;
     initStateCurList = NULL;
@@ -1372,7 +1372,7 @@ bool WrappedID3D12Device::EndFrameCapture(void *dev, void *wnd)
 
   // transition back to IDLE and readback initial states atomically
   {
-    SCOPED_LOCK(m_CapTransitionLock);
+    SCOPED_WRITELOCK(m_CapTransitionLock);
     EndCaptureFrame(backbuffer);
 
     m_State = CaptureState::BackgroundCapturing;
