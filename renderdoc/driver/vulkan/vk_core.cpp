@@ -1279,6 +1279,38 @@ void WrappedVulkan::StartFrameCapture(void *dev, void *wnd)
   RDCLOG("Starting capture, frame %u", m_FrameCounter);
 }
 
+bool WrappedVulkan::SwapBuffers(void *dev, void *wnd)
+{
+  if(IsBackgroundCapturing(m_State))
+  {
+    RenderDoc::Inst().Tick();
+
+    GetResourceManager()->FlushPendingDirty();
+  }
+
+  m_FrameCounter++;    // first present becomes frame #1, this function is at the end of the frame
+
+  bool activeWindow = RenderDoc::Inst().IsActiveWindow(dev, wnd);
+
+  RenderDoc::Inst().AddActiveDriver(RDCDriver::Vulkan, true);
+
+  if(!activeWindow)
+    return false;
+
+    // kill any current capture that isn't application defined
+  if(IsActiveCapturing(m_State) && !m_AppControlledCapture)
+    RenderDoc::Inst().EndFrameCapture(dev, wnd);
+
+  if(RenderDoc::Inst().ShouldTriggerCapture(m_FrameCounter) && IsBackgroundCapturing(m_State))
+  {
+    RenderDoc::Inst().StartFrameCapture(dev, wnd);
+
+    m_AppControlledCapture = false;
+  }
+
+  return true;
+}
+
 bool WrappedVulkan::EndFrameCapture(void *dev, void *wnd)
 {
   if(!IsActiveCapturing(m_State))

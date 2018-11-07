@@ -323,8 +323,8 @@ string WrappedVulkan::MakeRenderPassOpString(bool store)
           if(atts[dsAttach].storeOp == atts[dsAttach].stencilStoreOp)
             opDesc += "DS=" + ToHumanStr(atts[dsAttach].storeOp);
           else
-            opDesc += "D=" + ToHumanStr(atts[dsAttach].storeOp) + ", S=" +
-                      ToHumanStr(atts[dsAttach].stencilStoreOp);
+            opDesc += "D=" + ToHumanStr(atts[dsAttach].storeOp) +
+                      ", S=" + ToHumanStr(atts[dsAttach].stencilStoreOp);
         }
         else
         {
@@ -332,8 +332,8 @@ string WrappedVulkan::MakeRenderPassOpString(bool store)
           if(atts[dsAttach].loadOp == atts[dsAttach].stencilLoadOp)
             opDesc += "DS=" + ToHumanStr(atts[dsAttach].loadOp);
           else
-            opDesc += "D=" + ToHumanStr(atts[dsAttach].loadOp) + ", S=" +
-                      ToHumanStr(atts[dsAttach].stencilLoadOp);
+            opDesc += "D=" + ToHumanStr(atts[dsAttach].loadOp) +
+                      ", S=" + ToHumanStr(atts[dsAttach].stencilLoadOp);
         }
       }
     }
@@ -3366,6 +3366,14 @@ bool WrappedVulkan::Serialise_vkCmdDebugMarkerInsertEXT(SerialiserType &ser,
   return true;
 }
 
+void WrappedVulkan::HandleVRFrameMarkers(const char *marker)
+{
+  if(strstr(marker, "vr-marker,frame_end,type,application") != NULL)
+  {
+    RDCLOG("Capturing VR marker, %s", marker);
+  }
+}
+
 void WrappedVulkan::vkCmdDebugMarkerInsertEXT(VkCommandBuffer commandBuffer,
                                               const VkDebugMarkerMarkerInfoEXT *pMarker)
 {
@@ -3374,6 +3382,8 @@ void WrappedVulkan::vkCmdDebugMarkerInsertEXT(VkCommandBuffer commandBuffer,
     SERIALISE_TIME_CALL(
         ObjDisp(commandBuffer)->CmdDebugMarkerInsertEXT(Unwrap(commandBuffer), pMarker));
   }
+
+  HandleVRFrameMarkers(pMarker->pMarkerName);
 
   if(IsCaptureMode(m_State))
   {

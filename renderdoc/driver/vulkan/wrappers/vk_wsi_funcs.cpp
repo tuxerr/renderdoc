@@ -621,15 +621,6 @@ VkResult WrappedVulkan::vkCreateSwapchainKHR(VkDevice device,
 
 VkResult WrappedVulkan::vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR *pPresentInfo)
 {
-  if(IsBackgroundCapturing(m_State))
-  {
-    RenderDoc::Inst().Tick();
-
-    GetResourceManager()->FlushPendingDirty();
-  }
-
-  m_FrameCounter++;    // first present becomes frame #1, this function is at the end of the frame
-
   if(pPresentInfo->swapchainCount > 1 && (m_FrameCounter % 100) == 0)
   {
     RDCWARN("Presenting multiple swapchains at once - only first will be processed");
@@ -664,18 +655,18 @@ VkResult WrappedVulkan::vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR 
   }
   RDCASSERT(pPresentInfo->pNext == NULL);
 
+
   // TODO support multiple swapchains here
   VkResourceRecord *swaprecord = GetRecord(pPresentInfo->pSwapchains[0]);
   RDCASSERT(swaprecord->swapInfo);
 
   SwapchainInfo &swapInfo = *swaprecord->swapInfo;
-
+  swapInfo.lastPresent = pPresentInfo->pImageIndices[0];
+  m_LastSwap = swaprecord->GetResourceID();
   bool activeWindow = RenderDoc::Inst().IsActiveWindow(LayerDisp(m_Instance), swapInfo.wndHandle);
 
   // need to record which image was last flipped so we can get the correct backbuffer
   // for a thumbnail in EndFrameCapture
-  swapInfo.lastPresent = pPresentInfo->pImageIndices[0];
-  m_LastSwap = swaprecord->GetResourceID();
 
   if(IsBackgroundCapturing(m_State))
   {
@@ -787,21 +778,7 @@ VkResult WrappedVulkan::vkQueuePresentKHR(VkQueue queue, const VkPresentInfoKHR 
 
   VkResult vkr = ObjDisp(queue)->QueuePresentKHR(Unwrap(queue), &unwrappedInfo);
 
-  RenderDoc::Inst().AddActiveDriver(RDCDriver::Vulkan, true);
-
-  if(!activeWindow)
-    return vkr;
-
-  // kill any current capture that isn't application defined
-  if(IsActiveCapturing(m_State) && !m_AppControlledCapture)
-    RenderDoc::Inst().EndFrameCapture(LayerDisp(m_Instance), swapInfo.wndHandle);
-
-  if(RenderDoc::Inst().ShouldTriggerCapture(m_FrameCounter) && IsBackgroundCapturing(m_State))
-  {
-    RenderDoc::Inst().StartFrameCapture(LayerDisp(m_Instance), swapInfo.wndHandle);
-
-    m_AppControlledCapture = false;
-  }
+  SwapBuffers(LayerDisp(m_Instance), swapInfo.wndHandle);
 
   return vkr;
 }
