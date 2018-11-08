@@ -1198,8 +1198,11 @@ bool WrappedVulkan::Serialise_BeginCaptureFrame(SerialiserType &ser)
 
 void WrappedVulkan::StartFrameCapture(void *dev, void *wnd)
 {
+	RDCLOG("Start frame capture function!");
+
   if(!IsBackgroundCapturing(m_State))
     return;
+
 
   m_AppControlledCapture = true;
 
@@ -1290,7 +1293,12 @@ bool WrappedVulkan::SwapBuffers(void *dev, void *wnd)
 
   m_FrameCounter++;    // first present becomes frame #1, this function is at the end of the frame
 
+  void *adev, *awnd;
+  RenderDoc::Inst().GetActiveWindow(adev, awnd);
   bool activeWindow = RenderDoc::Inst().IsActiveWindow(dev, wnd);
+  bool shouldTrigger = RenderDoc::Inst().ShouldTriggerCapture(m_FrameCounter), backgroundCapture = IsBackgroundCapturing(m_State);
+
+  RDCLOG("Comparing dev %p vs %p, wnd %p vs %p with should trigger %d and background capture %d for active window %d", dev, adev, wnd, awnd, shouldTrigger, backgroundCapture, activeWindow);
 
   RenderDoc::Inst().AddActiveDriver(RDCDriver::Vulkan, true);
 
@@ -1299,11 +1307,12 @@ bool WrappedVulkan::SwapBuffers(void *dev, void *wnd)
 
     // kill any current capture that isn't application defined
   if(IsActiveCapturing(m_State) && !m_AppControlledCapture)
-    RenderDoc::Inst().EndFrameCapture(dev, wnd);
+    RenderDoc::Inst().EndFrameCapture(LayerDisp(m_Instance), nullptr);
 
-  if(RenderDoc::Inst().ShouldTriggerCapture(m_FrameCounter) && IsBackgroundCapturing(m_State))
+  if(shouldTrigger && backgroundCapture)
   {
-    RenderDoc::Inst().StartFrameCapture(dev, wnd);
+	  RDCLOG("starting frame capture");
+	  RenderDoc::Inst().StartFrameCapture(LayerDisp(m_Instance), nullptr);
 
     m_AppControlledCapture = false;
   }
@@ -1336,6 +1345,9 @@ bool WrappedVulkan::EndFrameCapture(void *dev, void *wnd)
 
   RDCLOG("Finished capture, Frame %u", m_FrameCounter);
 
+
+
+   
   VkImage backbuffer = VK_NULL_HANDLE;
   VkResourceRecord *swaprecord = NULL;
 

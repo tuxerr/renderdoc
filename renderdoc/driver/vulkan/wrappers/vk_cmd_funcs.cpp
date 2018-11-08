@@ -3370,6 +3370,9 @@ void WrappedVulkan::HandleVRFrameMarkers(const char *marker)
 {
   if(strstr(marker, "vr-marker,frame_end,type,application") != NULL)
   {
+	  void *adev, *awnd;
+	  RenderDoc::Inst().GetActiveWindow(adev, awnd);
+	SwapBuffers(adev, awnd);
     RDCLOG("Capturing VR marker, %s", marker);
   }
 }
