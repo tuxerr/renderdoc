@@ -771,7 +771,7 @@ private:
   bool EndFrameCapture(void *dev, void *wnd);
   bool SwapBuffers(void *dev, void *wnd);
 
-  void HandleVRFrameMarkers(const char *marker);
+  void HandleVRFrameMarkers(const char *marker, VkCommandBuffer commandBuffer);
 
   template <typename SerialiserType>
   bool Serialise_SetShaderDebugPath(SerialiserType &ser, VkShaderModule ShaderObject,

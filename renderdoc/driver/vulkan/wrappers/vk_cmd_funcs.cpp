@@ -555,6 +555,7 @@ VkResult WrappedVulkan::vkAllocateCommandBuffers(VkDevice device,
         record->cmdInfo->allocInfo = *pAllocateInfo;
         record->cmdInfo->allocInfo.commandBufferCount = 1;
         record->cmdInfo->allocRecord = allocRecord;
+        record->cmdInfo->swapBuffers = false;
       }
       else
       {
@@ -3366,14 +3367,15 @@ bool WrappedVulkan::Serialise_vkCmdDebugMarkerInsertEXT(SerialiserType &ser,
   return true;
 }
 
-void WrappedVulkan::HandleVRFrameMarkers(const char *marker)
+void WrappedVulkan::HandleVRFrameMarkers(const char *marker, VkCommandBuffer commandBuffer)
 {
   if(strstr(marker, "vr-marker,frame_end,type,application") != NULL)
   {
-	  void *adev, *awnd;
+    VkResourceRecord *record = GetRecord(commandBuffer);
+    record->cmdInfo->swapBuffers = true;
+	  /*void *adev, *awnd;
 	  RenderDoc::Inst().GetActiveWindow(adev, awnd);
-	SwapBuffers(adev, awnd);
-    RDCLOG("Capturing VR marker, %s", marker);
+	  SwapBuffers(adev, awnd);*/
   }
 }
 
@@ -3386,7 +3388,7 @@ void WrappedVulkan::vkCmdDebugMarkerInsertEXT(VkCommandBuffer commandBuffer,
         ObjDisp(commandBuffer)->CmdDebugMarkerInsertEXT(Unwrap(commandBuffer), pMarker));
   }
 
-  HandleVRFrameMarkers(pMarker->pMarkerName);
+  HandleVRFrameMarkers(pMarker->pMarkerName, commandBuffer);
 
   if(IsCaptureMode(m_State))
   {

@@ -1007,7 +1007,8 @@ bool WrappedVulkan::Serialise_vkCreateBuffer(SerialiserType &ser, VkDevice devic
     VkBufferUsageFlags origusage = CreateInfo.usage;
 
     // ensure we can always readback from buffers
-    CreateInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+    if( ( CreateInfo.usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT ) == 0)
+		CreateInfo.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
     // remap the queue family indices
     if(CreateInfo.sharingMode == VK_SHARING_MODE_EXCLUSIVE)
@@ -1060,7 +1061,8 @@ VkResult WrappedVulkan::vkCreateBuffer(VkDevice device, const VkBufferCreateInfo
 
   // TEMP HACK: Until we define a portable fake hardware, need to match the requirements for usage
   // on replay, so that the memory requirements are the same
-  adjusted_info.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
+  if( ( adjusted_info.usage & VK_BUFFER_USAGE_TRANSFER_DST_BIT ) == 0)
+	adjusted_info.usage |= VK_BUFFER_USAGE_TRANSFER_SRC_BIT;
 
   byte *tempMem = GetTempMemory(GetNextPatchSize(adjusted_info.pNext));
 
@@ -1069,6 +1071,8 @@ VkResult WrappedVulkan::vkCreateBuffer(VkDevice device, const VkBufferCreateInfo
   VkResult ret;
   SERIALISE_TIME_CALL(
       ret = ObjDisp(device)->CreateBuffer(Unwrap(device), &adjusted_info, pAllocator, pBuffer));
+
+  RDCLOG("Creating vkBuffer with result %d!", ret == VK_SUCCESS);
 
   if(ret == VK_SUCCESS)
   {
@@ -1174,7 +1178,10 @@ VkResult WrappedVulkan::vkCreateBuffer(VkDevice device, const VkBufferCreateInfo
       m_CreationInfo.m_Buffer[id].Init(GetResourceManager(), m_CreationInfo, pCreateInfo);
     }
   }
-
+  else
+  {
+    RDCLOG("Failed on vkCreateBuffer");
+  }
   return ret;
 }
 

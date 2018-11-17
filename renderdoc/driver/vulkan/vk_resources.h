@@ -929,6 +929,9 @@ struct CmdBufferRecordingInfo
   set<VkDescriptorSet> boundDescSets;
 
   vector<VkResourceRecord *> subcmds;
+
+  // this cmdbuffer contains a swapbuffers instruction
+  bool swapBuffers;
 };
 
 struct DescSetLayout;

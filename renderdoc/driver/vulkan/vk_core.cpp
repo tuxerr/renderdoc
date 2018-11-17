@@ -1298,8 +1298,6 @@ bool WrappedVulkan::SwapBuffers(void *dev, void *wnd)
   bool activeWindow = RenderDoc::Inst().IsActiveWindow(dev, wnd);
   bool shouldTrigger = RenderDoc::Inst().ShouldTriggerCapture(m_FrameCounter), backgroundCapture = IsBackgroundCapturing(m_State);
 
-  RDCLOG("Comparing dev %p vs %p, wnd %p vs %p with should trigger %d and background capture %d for active window %d", dev, adev, wnd, awnd, shouldTrigger, backgroundCapture, activeWindow);
-
   RenderDoc::Inst().AddActiveDriver(RDCDriver::Vulkan, true);
 
   if(!activeWindow)
@@ -1311,8 +1309,9 @@ bool WrappedVulkan::SwapBuffers(void *dev, void *wnd)
 
   if(shouldTrigger && backgroundCapture)
   {
-	  RDCLOG("starting frame capture");
-	  RenderDoc::Inst().StartFrameCapture(LayerDisp(m_Instance), nullptr);
+    RDCLOG("Starting frame capture with resources %d",
+           RenderDoc::Inst().GetCaptureOptions().refAllResources);
+	RenderDoc::Inst().StartFrameCapture(LayerDisp(m_Instance), nullptr);
 
     m_AppControlledCapture = false;
   }
@@ -1344,8 +1343,6 @@ bool WrappedVulkan::EndFrameCapture(void *dev, void *wnd)
   }
 
   RDCLOG("Finished capture, Frame %u", m_FrameCounter);
-
-
 
    
   VkImage backbuffer = VK_NULL_HANDLE;

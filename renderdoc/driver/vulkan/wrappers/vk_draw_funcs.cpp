@@ -2056,9 +2056,8 @@ bool WrappedVulkan::Serialise_vkCmdClearColorImage(SerialiserType &ser, VkComman
             ->CmdClearColorImage(Unwrap(commandBuffer), Unwrap(image), imageLayout, &Color,
                                  rangeCount, pRanges);
 
-        if(eventId &&
-           m_DrawcallCallback->PostMisc(
-               eventId, DrawFlags(DrawFlags::Clear | DrawFlags::ClearColor), commandBuffer))
+        if(eventId && m_DrawcallCallback->PostMisc(
+                          eventId, DrawFlags(DrawFlags::Clear | DrawFlags::ClearColor), commandBuffer))
         {
           ObjDisp(commandBuffer)
               ->CmdClearColorImage(Unwrap(commandBuffer), Unwrap(image), imageLayout, &Color,

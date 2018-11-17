@@ -58,7 +58,7 @@ bool MarkReferenced(std::map<ResourceId, FrameRefType> &refs, ResourceId id, Fra
 
 // verbose prints with IDs of each dirty resource and whether it was prepared,
 // and whether it was serialised.
-#define VERBOSE_DIRTY_RESOURCES OPTION_OFF
+#define VERBOSE_DIRTY_RESOURCES OPTION_ON
 
 namespace ResourceIDGen
 {
@@ -821,6 +821,7 @@ void ResourceManager<Configuration>::InsertReferencedChunks(WriteSerialiser &ser
     {
       RenderDoc::Inst().SetProgress(CaptureProgress::AddReferencedResources, idx / num);
       idx += 1.0f;
+      RDCLOG("Record %f is %llu", idx, it->first);
 
       if(m_FrameReferencedResources.find(it->first) == m_FrameReferencedResources.end() &&
          it->second->InternalResource)
@@ -836,6 +837,7 @@ void ResourceManager<Configuration>::InsertReferencedChunks(WriteSerialiser &ser
 
     for(auto it = m_FrameReferencedResources.begin(); it != m_FrameReferencedResources.end(); ++it)
     {
+      RDCLOG("Record %f is %llu", idx, it->first);
       RenderDoc::Inst().SetProgress(CaptureProgress::AddReferencedResources, idx / num);
       idx += 1.0f;
 

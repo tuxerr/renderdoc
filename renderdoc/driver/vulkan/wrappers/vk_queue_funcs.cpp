@@ -779,6 +779,7 @@ VkResult WrappedVulkan::vkQueueSubmit(VkQueue queue, uint32_t submitCount,
                                                         unwrappedSubmits, Unwrap(fence)));
 
   bool capframe = false;
+  bool swapBuffers = false;
   set<ResourceId> refdIDs;
 
   VkResourceRecord *queueRecord = GetRecord(queue);
@@ -790,6 +791,7 @@ VkResult WrappedVulkan::vkQueueSubmit(VkQueue queue, uint32_t submitCount,
       ResourceId cmd = GetResID(pSubmits[s].pCommandBuffers[i]);
 
       VkResourceRecord *record = GetRecord(pSubmits[s].pCommandBuffers[i]);
+      swapBuffers |= record->cmdInfo->swapBuffers;
 
       {
         SCOPED_LOCK(m_ImageLayoutsLock);
@@ -1003,6 +1005,13 @@ VkResult WrappedVulkan::vkQueueSubmit(VkQueue queue, uint32_t submitCount,
         GetResourceManager()->MarkResourceFrameReferenced(
             GetResID(pSubmits[s].pSignalSemaphores[sem]), eFrameRef_Read);
     }
+  }
+
+  if (swapBuffers)
+  {
+    void *adev, *awnd;
+    RenderDoc::Inst().GetActiveWindow(adev, awnd);
+    SwapBuffers(adev, awnd);
   }
 
   return ret;
