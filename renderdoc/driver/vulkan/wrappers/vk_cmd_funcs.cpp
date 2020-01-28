@@ -1303,6 +1303,11 @@ bool WrappedVulkan::Serialise_vkCmdBeginRenderPass(SerialiserType &ser, VkComman
           DoPipelineBarrier(commandBuffer, imgBarriers.size(), imgBarriers.data());
         }
 
+		DrawFlags drawFlags = DrawFlags::PassBoundary | DrawFlags::BeginPass;
+        uint32_t eventId = HandlePreCallback(commandBuffer, drawFlags);
+        if(eventId)
+          m_DrawcallCallback->PreDraw(eventId, commandBuffer);
+
         ObjDisp(commandBuffer)->CmdBeginRenderPass(Unwrap(commandBuffer), &unwrappedInfo, contents);
 
         ResourceId cmd = GetResID(commandBuffer);
@@ -1566,6 +1571,11 @@ bool WrappedVulkan::Serialise_vkCmdEndRenderPass(SerialiserType &ser, VkCommandB
         }
 
         ObjDisp(commandBuffer)->CmdEndRenderPass(Unwrap(commandBuffer));
+
+		DrawFlags drawFlags = DrawFlags::PassBoundary | DrawFlags::EndPass;
+        uint32_t eventId = HandlePreCallback(commandBuffer, drawFlags);
+		if(eventId)
+			m_DrawcallCallback->PostDraw(eventId, commandBuffer);
 
         ResourceId cmd = GetResID(commandBuffer);
         GetResourceManager()->RecordBarriers(m_BakedCmdBufferInfo[cmd].imgbarriers, m_ImageLayouts,

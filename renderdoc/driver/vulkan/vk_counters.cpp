@@ -701,6 +701,12 @@ rdcarray<CounterResult> VulkanReplay::FetchCountersKHR(const rdcarray<GPUCounter
 
 struct VulkanGPUTimerCallback : public VulkanDrawcallCallback
 {
+  static std::set<VkCommandBuffer> visitedCmds;
+  static void resetSet()
+  {
+	  visitedCmds.clear();
+  }
+
   VulkanGPUTimerCallback(WrappedVulkan *vk, VulkanReplay *rp, VkQueryPool tsqp, VkQueryPool occqp,
                          VkQueryPool psqp)
       : m_pDriver(vk),
@@ -714,6 +720,15 @@ struct VulkanGPUTimerCallback : public VulkanDrawcallCallback
   ~VulkanGPUTimerCallback() { m_pDriver->SetDrawcallCB(NULL); }
   void PreDraw(uint32_t eid, VkCommandBuffer cmd) override
   {
+
+	  const DrawcallDescription *draw = m_pDriver->GetDrawcall(eid);
+	  /*if (!(draw->previous->flags & DrawFlags::BeginPass ))
+		  return;*/
+	if (!(draw->flags & DrawFlags::BeginPass ))
+		return;
+
+	  RDCLOG("Writing top of pipe timer query before EID %d in query %d", eid, (uint32_t)(m_Results.size() * 2 + 0));
+
     if(m_OcclusionQueryPool != VK_NULL_HANDLE)
       ObjDisp(cmd)->CmdBeginQuery(Unwrap(cmd), m_OcclusionQueryPool, (uint32_t)m_Results.size(),
                                   VK_QUERY_CONTROL_PRECISE_BIT);
@@ -725,8 +740,17 @@ struct VulkanGPUTimerCallback : public VulkanDrawcallCallback
 
   bool PostDraw(uint32_t eid, VkCommandBuffer cmd) override
   {
+
+	  const DrawcallDescription *draw = m_pDriver->GetDrawcall(eid);
+	  /*if (!(draw->next->flags & DrawFlags::EndPass) && !(draw->next->flags & DrawFlags::BeginPass))
+		  return false;*/
+	  if (!(draw->flags & DrawFlags::EndPass))
+		  return false;
+
     ObjDisp(cmd)->CmdWriteTimestamp(Unwrap(cmd), VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT,
                                     m_TimeStampQueryPool, (uint32_t)(m_Results.size() * 2 + 1));
+	RDCLOG("Writing bottom of pipe timer query after EID %d in query %d", eid, (uint32_t)(m_Results.size() * 2 + 1));
+
     if(m_OcclusionQueryPool != VK_NULL_HANDLE)
       ObjDisp(cmd)->CmdEndQuery(Unwrap(cmd), m_OcclusionQueryPool, (uint32_t)m_Results.size());
     if(m_PipeStatsQueryPool != VK_NULL_HANDLE)
