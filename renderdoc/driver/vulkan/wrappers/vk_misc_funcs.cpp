@@ -821,13 +821,13 @@ bool WrappedVulkan::Serialise_vkCreateRenderPass(SerialiserType &ser, VkDevice d
     VkAttachmentDescription *att = (VkAttachmentDescription *)CreateInfo.pAttachments;
     for(uint32_t i = 0; i < CreateInfo.attachmentCount; i++)
     {
-      att[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-      att[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+      /*att[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+      att[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;*/
 
-      if(att[i].loadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
+      /*if(att[i].loadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
         att[i].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
       if(att[i].stencilLoadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
-        att[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        att[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD;*/
 
       // sanitise the actual layouts used to create the renderpass
       SanitiseOldImageLayout(att[i].initialLayout);
@@ -1053,13 +1053,13 @@ bool WrappedVulkan::Serialise_vkCreateRenderPass2(SerialiserType &ser, VkDevice 
     VkAttachmentDescription2 *att = (VkAttachmentDescription2 *)CreateInfo.pAttachments;
     for(uint32_t i = 0; i < CreateInfo.attachmentCount; i++)
     {
-      att[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
-      att[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;
+      /*att[i].storeOp = VK_ATTACHMENT_STORE_OP_STORE;
+      att[i].stencilStoreOp = VK_ATTACHMENT_STORE_OP_STORE;*/
 
-      if(att[i].loadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
+      /*if(att[i].loadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
         att[i].loadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
       if(att[i].stencilLoadOp == VK_ATTACHMENT_LOAD_OP_DONT_CARE)
-        att[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD;
+        att[i].stencilLoadOp = VK_ATTACHMENT_LOAD_OP_LOAD;*/
 
       // renderpass can't start or end in presentable layout on replay
       SanitiseOldImageLayout(att[i].initialLayout);
